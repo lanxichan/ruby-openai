@@ -9,6 +9,8 @@ require_relative "openai/images"
 require_relative "openai/models"
 require_relative "openai/audio"
 require_relative "openai/version"
+require_relative "openai/assistants"
+require_relative "openai/threads"
 
 module OpenAI
   class Error < StandardError; end
@@ -31,6 +33,7 @@ module OpenAI
       @uri_base = DEFAULT_URI_BASE
       @request_timeout = DEFAULT_REQUEST_TIMEOUT
       @extra_headers = nil
+      @is_beta = false
     end
 
     def access_token
