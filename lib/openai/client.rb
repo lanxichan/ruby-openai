@@ -9,9 +9,9 @@ module OpenAI
       organization_id
       uri_base
       request_timeout
-      extra_headers
     ].freeze
     attr_reader *CONFIG_KEYS
+    attr_accessor :is_beta, :extra_headers
 
     def initialize(config = {})
       CONFIG_KEYS.each do |key|
@@ -19,6 +19,8 @@ module OpenAI
         # if not present.
         instance_variable_set("@#{key}", config[key] || OpenAI.configuration.send(key))
       end
+      @extra_headers = config[:extra_headers] || OpenAI.configuration.send(:extra_headers) || {}
+      @is_beta = config[:is_beta] || false
     end
 
     def chat(parameters: {})
@@ -59,6 +61,21 @@ module OpenAI
 
     def azure?
       @api_type&.to_sym == :azure
+    end
+
+    def beta
+      self.is_beta = true
+      self
+    end
+
+    def assiatants
+      self.extra_headers = extra_headers.merge({ "OpenAI-Beta": "assistants=v1" }) if is_beta
+      @assiatants ||= OpenAI::Assistants.new(client: self)
+    end
+
+    def threads
+      self.extra_headers = extra_headers.merge({ "OpenAI-Beta": "assistants=v1" }) if is_beta
+      @threads ||= OpenAI::Threads.new(client: self)
     end
   end
 end
